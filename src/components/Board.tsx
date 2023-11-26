@@ -1,42 +1,49 @@
 import { Cell } from "@/components/Cell";
 import { Dimensions } from "@/types/game";
 import { GameBoard } from "@/utils/GameBoard";
-import { FC, useCallback, useEffect, useMemo } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 
 export type BoardProps = {
    dimensions: Dimensions | number;
 };
 
 export const Board: FC<BoardProps> = ({ dimensions }) => {
-   const board = useMemo(() => new GameBoard(dimensions), [dimensions]);
+   const [board, setBoard] = useState(new GameBoard(dimensions));
    const { height, width } = board;
    const handleKeyPress = useCallback((e: KeyboardEvent) => {
       switch (e.key) {
          case "ArrowUp":
          case "w":
-            console.log("up");
             board.moveUp();
             board.clearMerges();
+            setBoard(board.getClone());
             break;
          case "ArrowDown":
          case "s":
-            console.log("down");
             board.moveDown();
             board.clearMerges();
+            setBoard(board.getClone());
             break;
          case "ArrowLeft":
          case "a":
-            console.log("left");
             board.moveLeft();
             board.clearMerges();
+            setBoard(board.getClone());
             break;
          case "ArrowRight":
          case "d":
-            console.log("right");
             board.moveRight();
             board.clearMerges();
+            setBoard(board.getClone());
             break;
       }
+      console.table(
+         board.fields.map((cell) => ({
+            ...cell,
+            column: cell.position.column,
+            row: cell.position.row,
+         }))
+      );
    }, []);
 
    useEffect(() => {

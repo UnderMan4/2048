@@ -25,6 +25,10 @@ export class GameBoard {
       );
    };
 
+   public getClone = (): GameBoard => {
+      return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
+   };
+
    public getCellById = (id: string): Field | undefined => {
       return this.fields.find((field) => field.id === id);
    };
@@ -138,68 +142,79 @@ export class GameBoard {
    };
 
    private merge = (fields: Field[][]) => {
-      for (const columnOrRow of fields) {
-         if (columnOrRow.length <= 1) continue;
+      fields.forEach((columnOrRow) => {
+         if (columnOrRow.length <= 1) return;
          let prevCell: Field | null = null;
-         for (const cell of columnOrRow) {
+         columnOrRow.forEach((cell) => {
             if (prevCell && cell.value === prevCell.value) {
                cell.mergeWith = prevCell;
                cell.value *= 2;
-               this.fields.splice(this.fields.indexOf(prevCell));
+               this.fields.splice(this.fields.indexOf(prevCell), 1);
+               prevCell = null;
+            } else {
+               prevCell = cell;
             }
-            prevCell = cell;
-         }
-      }
-   };
-
-   private moveRows = (rows: Field[][]) => {
-      rows.forEach((row) => {
-         if (row.length === 0) return;
-         let min = 1;
-         row.forEach((cell) => {
-            if (cell.position.row > min) {
-               cell.position.row = min;
-            }
-            min++;
-         });
-      });
-   };
-
-   private moveColumns = (columns: Field[][]) => {
-      columns.forEach((column) => {
-         if (column.length === 0) return;
-         let min = 1;
-         column.forEach((cell) => {
-            if (cell.position.column > min) {
-               cell.position.column = min;
-            }
-            min++;
          });
       });
    };
 
    public moveUp = (): void => {
       this.merge(this.getColumnsBottomToTop());
-      this.moveColumns(this.getColumnsBottomToTop());
-
+      this.getColumnsTopToBottom().forEach((column) => {
+         if (column.length === 0) return;
+         let min = 0;
+         column.forEach((cell) => {
+            if (cell.position.row > min) {
+               cell.position.row = min;
+            }
+            min++;
+         });
+      });
       this.addRandomCell();
    };
 
    public moveDown = (): void => {
       this.merge(this.getColumnsTopToBottom());
-      this.moveColumns(this.getColumnsTopToBottom());
+      this.getColumnsBottomToTop().forEach((column) => {
+         if (column.length === 0) return;
+         let max = this.height - 1;
+         column.forEach((cell) => {
+            if (cell.position.row < max) {
+               cell.position.row = max;
+            }
+            max--;
+         });
+      });
       this.addRandomCell();
    };
 
    public moveLeft = (): void => {
       this.merge(this.getRowsRightToLeft());
-      this.moveRows(this.getRowsRightToLeft());
+      this.getRowsLeftToRight().forEach((row) => {
+         if (row.length === 0) return;
+         let min = 0;
+         row.forEach((cell) => {
+            if (cell.position.column > min) {
+               cell.position.column = min;
+            }
+            min++;
+         });
+      });
       this.addRandomCell();
    };
 
    public moveRight = (): void => {
       this.merge(this.getRowsLeftToRight());
-      this.moveRows(this.getRowsLeftToRight());
+      this.getRowsRightToLeft().forEach((row) => {
+         if (row.length === 0) return;
+         let max = this.width - 1;
+         row.forEach((cell) => {
+            if (cell.position.column < max) {
+               cell.position.column = max;
+            }
+            max--;
+         });
+      });
       this.addRandomCell();
    };
 }
