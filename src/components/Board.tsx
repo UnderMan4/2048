@@ -13,6 +13,8 @@ export const Board: FC<BoardProps> = ({ dimensions }) => {
    const parentRef = useRef<HTMLDivElement>(null);
    const bgCellsRef = useRef<HTMLDivElement>(null);
    const cellsRef = useRef<HTMLDivElement>(null);
+
+   const [boardSize, setBoardSize] = useState(0);
    const handleKeyPress = useCallback((e: KeyboardEvent) => {
       if (isBlocked) return;
 
@@ -40,14 +42,10 @@ export const Board: FC<BoardProps> = ({ dimensions }) => {
             break;
       }
       setTimeout(() => {
-         board.merge();
-         setBoard(board.getClone());
-      }, 0);
-      setTimeout(() => {
          board.addRandomCell();
          setBoard(board.getClone());
          setIsBlocked(false);
-      }, 200);
+      }, 300);
    }, []);
 
    useEffect(() => {
@@ -63,6 +61,7 @@ export const Board: FC<BoardProps> = ({ dimensions }) => {
          if (!parent) return;
          const { width, height } = parent.contentRect;
          const boardSize = Math.min(width, height);
+         setBoardSize(boardSize);
          if (bgCellsRef.current) {
             bgCellsRef.current.style.width = `${boardSize}px`;
             bgCellsRef.current.style.height = `${boardSize}px`;
@@ -100,7 +99,7 @@ export const Board: FC<BoardProps> = ({ dimensions }) => {
             ))}
          </div>
          <div className="absolute flex flex-col gap-2" ref={cellsRef}>
-            {Array.from({ length: height }, (_, i) => (
+            {/* {Array.from({ length: height }, (_, i) => (
                <div key={i} className="flex flex-grow gap-2">
                   {Array.from({ length: width }, (_, j) => (
                      <div
@@ -118,7 +117,17 @@ export const Board: FC<BoardProps> = ({ dimensions }) => {
                      </div>
                   ))}
                </div>
-            ))}
+            ))} */}
+            {board.cells.map((cell) => {
+               return (
+                  <Cell
+                     key={cell.id}
+                     board={board}
+                     cellAddress={cell.position}
+                     boardSize={boardSize}
+                  />
+               );
+            })}
          </div>
       </div>
    );

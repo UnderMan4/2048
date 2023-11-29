@@ -1,8 +1,9 @@
-export type Field = {
+export type Cell = {
    id: string;
    value: number;
    position: Position;
-   mergeWith?: Field;
+   mergeWith?: Cell;
+   animationEnded?: boolean;
 };
 
 export type Position = {
@@ -11,7 +12,7 @@ export type Position = {
 };
 
 export type BoardData = {
-   fields: Field[];
+   fields: Cell[];
    height: number;
    width: number;
 };
