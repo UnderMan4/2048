@@ -59,7 +59,7 @@ devDependencies:
     specifier: ^0.5.7
     version: 0.5.7(tailwindcss@3.3.5)
   '@types/react':
-    specifier: ^18.2.37
+    specifier: ^18.2.38
     version: 18.2.38
   '@types/react-dom':
     specifier: ^18.2.15

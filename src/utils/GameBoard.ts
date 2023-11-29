@@ -89,7 +89,7 @@ export class GameBoard {
       );
    };
 
-   private addRandomCell = (): void => {
+   public addRandomCell = (): void => {
       let foundEmptyCell = false;
       do {
          const position = {
@@ -103,14 +103,19 @@ export class GameBoard {
 
          this.fields.push({
             id: nanoid(10),
-            value: getRandomValueFromArray([2, 2, 2, 4]),
+            // value: getRandomValueFromArray([2, 2, 2, 4]),
+            value: getRandomValueFromArray([16]),
             position,
          });
       } while (!foundEmptyCell);
    };
 
-   public clearMerges = (): void => {
-      this.fields.forEach((field) => (field.mergeWith = undefined));
+   public merge = (): void => {
+      this.fields.forEach((field) => {
+         if (!field.mergeWith) return;
+         field.value *= 2;
+         field.mergeWith = undefined;
+      });
    };
 
    public isGameOver = (): boolean => {
@@ -141,14 +146,13 @@ export class GameBoard {
       return true;
    };
 
-   private merge = (fields: Field[][]) => {
+   private findMerges = (fields: Field[][]) => {
       fields.forEach((columnOrRow) => {
          if (columnOrRow.length <= 1) return;
          let prevCell: Field | null = null;
          columnOrRow.forEach((cell) => {
             if (prevCell && cell.value === prevCell.value) {
                cell.mergeWith = prevCell;
-               cell.value *= 2;
                this.fields.splice(this.fields.indexOf(prevCell), 1);
                prevCell = null;
             } else {
@@ -159,7 +163,7 @@ export class GameBoard {
    };
 
    public moveUp = (): void => {
-      this.merge(this.getColumnsBottomToTop());
+      this.findMerges(this.getColumnsTopToBottom());
       this.getColumnsTopToBottom().forEach((column) => {
          if (column.length === 0) return;
          let min = 0;
@@ -170,11 +174,10 @@ export class GameBoard {
             min++;
          });
       });
-      this.addRandomCell();
    };
 
    public moveDown = (): void => {
-      this.merge(this.getColumnsTopToBottom());
+      this.findMerges(this.getColumnsBottomToTop());
       this.getColumnsBottomToTop().forEach((column) => {
          if (column.length === 0) return;
          let max = this.height - 1;
@@ -185,11 +188,10 @@ export class GameBoard {
             max--;
          });
       });
-      this.addRandomCell();
    };
 
    public moveLeft = (): void => {
-      this.merge(this.getRowsRightToLeft());
+      this.findMerges(this.getRowsLeftToRight());
       this.getRowsLeftToRight().forEach((row) => {
          if (row.length === 0) return;
          let min = 0;
@@ -200,11 +202,10 @@ export class GameBoard {
             min++;
          });
       });
-      this.addRandomCell();
    };
 
    public moveRight = (): void => {
-      this.merge(this.getRowsLeftToRight());
+      this.findMerges(this.getRowsRightToLeft());
       this.getRowsRightToLeft().forEach((row) => {
          if (row.length === 0) return;
          let max = this.width - 1;
@@ -215,6 +216,5 @@ export class GameBoard {
             max--;
          });
       });
-      this.addRandomCell();
    };
 }
