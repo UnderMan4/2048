@@ -1,11 +1,11 @@
-import { Dimensions, Field, Position } from "@/types/game";
+import { Dimensions, Cell, Position } from "@/types/game";
 import { getRandomInt, getRandomValueFromArray } from "@/utils/commonUtils";
 import { nanoid } from "nanoid";
 
 export class GameBoard {
    readonly height: number;
    readonly width: number;
-   readonly fields: Field[] = [];
+   readonly cells: Cell[] = [];
 
    constructor(dimensions: Dimensions | number) {
       const { height, width } =
@@ -18,10 +18,9 @@ export class GameBoard {
       this.addRandomCell();
    }
 
-   public getCell = ({ column, row }: Position): Field | undefined => {
-      return this.fields.find(
-         (field) =>
-            field.position.row === row && field.position.column === column
+   public getCell = ({ column, row }: Position): Cell | undefined => {
+      return this.cells.find(
+         (cell) => cell.position.row === row && cell.position.column === column
       );
    };
 
@@ -29,61 +28,61 @@ export class GameBoard {
       return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
    };
 
-   public getCellById = (id: string): Field | undefined => {
-      return this.fields.find((field) => field.id === id);
+   public getCellById = (id: string): Cell | undefined => {
+      return this.cells.find((cell) => cell.id === id);
    };
 
-   private getRow = (row: number): Field[] => {
-      return this.fields.filter((field) => field.position.row === row);
+   private getRow = (row: number): Cell[] => {
+      return this.cells.filter((cell) => cell.position.row === row);
    };
 
-   private getColumn = (column: number): Field[] => {
-      return this.fields.filter((field) => field.position.column === column);
+   private getColumn = (column: number): Cell[] => {
+      return this.cells.filter((cell) => cell.position.column === column);
    };
 
-   public getRowLeftToRight = (row: number): Field[] => {
+   public getRowLeftToRight = (row: number): Cell[] => {
       return this.getRow(row).sort(
          (a, b) => a.position.column - b.position.column
       );
    };
 
-   public getRowRightToLeft = (row: number): Field[] => {
+   public getRowRightToLeft = (row: number): Cell[] => {
       return this.getRow(row).sort(
          (a, b) => b.position.column - a.position.column
       );
    };
 
-   public getColumnTopToBottom = (column: number): Field[] => {
+   public getColumnTopToBottom = (column: number): Cell[] => {
       return this.getColumn(column).sort(
          (a, b) => a.position.row - b.position.row
       );
    };
 
-   public getColumnBottomToTop = (column: number): Field[] => {
+   public getColumnBottomToTop = (column: number): Cell[] => {
       return this.getColumn(column).sort(
          (a, b) => b.position.row - a.position.row
       );
    };
 
-   public getRowsLeftToRight = (): Field[][] => {
+   public getRowsLeftToRight = (): Cell[][] => {
       return Array.from({ length: this.height }, (_, i) =>
          this.getRowLeftToRight(i)
       );
    };
 
-   public getRowsRightToLeft = (): Field[][] => {
+   public getRowsRightToLeft = (): Cell[][] => {
       return Array.from({ length: this.height }, (_, i) =>
          this.getRowRightToLeft(i)
       );
    };
 
-   public getColumnsTopToBottom = (): Field[][] => {
+   public getColumnsTopToBottom = (): Cell[][] => {
       return Array.from({ length: this.width }, (_, i) =>
          this.getColumnTopToBottom(i)
       );
    };
 
-   public getColumnsBottomToTop = (): Field[][] => {
+   public getColumnsBottomToTop = (): Cell[][] => {
       return Array.from({ length: this.width }, (_, i) =>
          this.getColumnBottomToTop(i)
       );
@@ -101,25 +100,35 @@ export class GameBoard {
 
          foundEmptyCell = true;
 
-         this.fields.push({
+         this.cells.push({
             id: nanoid(10),
-            // value: getRandomValueFromArray([2, 2, 2, 4]),
-            value: getRandomValueFromArray([16]),
+            value: getRandomValueFromArray([2, 2, 2, 4]),
+            // value: getRandomValueFromArray([16]),
             position,
          });
       } while (!foundEmptyCell);
    };
 
    public merge = (): void => {
-      this.fields.forEach((field) => {
-         if (!field.mergeWith) return;
-         field.value *= 2;
-         field.mergeWith = undefined;
+      this.cells.forEach((cell, index) => {
+         if (!cell.mergeWith) return;
+         cell.mergeWith.value *= 2;
+         cell.mergeWith.mergeWith = undefined;
+         this.cells.splice(index, 1);
       });
    };
 
+   public mergeCell = (id: string): void => {
+      const cell = this.getCellById(id);
+      if (!cell) return;
+      if (!cell.mergeWith) return;
+      cell.mergeWith.value *= 2;
+      cell.mergeWith.mergeWith = undefined;
+      this.cells.splice(this.cells.indexOf(cell), 1);
+   };
+
    public isGameOver = (): boolean => {
-      if (this.fields.length < this.height * this.width) return false;
+      if (this.cells.length < this.height * this.width) return false;
 
       for (let row = 0; row < this.height; row++) {
          for (let column = 0; column < this.width; column++) {
@@ -146,14 +155,16 @@ export class GameBoard {
       return true;
    };
 
-   private findMerges = (fields: Field[][]) => {
-      fields.forEach((columnOrRow) => {
+   private findMerges = (cells: Cell[][]) => {
+      cells.forEach((columnOrRow) => {
          if (columnOrRow.length <= 1) return;
-         let prevCell: Field | null = null;
+         let prevCell: Cell | null = null;
+
          columnOrRow.forEach((cell) => {
             if (prevCell && cell.value === prevCell.value) {
                cell.mergeWith = prevCell;
-               this.fields.splice(this.fields.indexOf(prevCell), 1);
+               prevCell.mergeWith = cell;
+
                prevCell = null;
             } else {
                prevCell = cell;
@@ -164,57 +175,101 @@ export class GameBoard {
 
    public moveUp = (): void => {
       this.findMerges(this.getColumnsTopToBottom());
-      this.getColumnsTopToBottom().forEach((column) => {
-         if (column.length === 0) return;
+
+      const columns = this.getColumnsTopToBottom();
+      console.log(
+         "🚀 ~ file: GameBoard.ts:171 ~ GameBoard ~ columns:",
+         columns
+      );
+
+      for (let i = 0; i < columns.length; i++) {
+         const column = columns[i]!;
+         if (column.length === 0) continue;
          let min = 0;
-         column.forEach((cell) => {
+
+         for (let j = 0; j < column.length; j++) {
+            const cell = column[j]!;
             if (cell.position.row > min) {
                cell.position.row = min;
             }
+            if (cell.mergeWith) {
+               cell.mergeWith.position.row = min;
+               j++;
+            }
             min++;
-         });
-      });
+         }
+      }
    };
 
    public moveDown = (): void => {
       this.findMerges(this.getColumnsBottomToTop());
-      this.getColumnsBottomToTop().forEach((column) => {
-         if (column.length === 0) return;
+
+      const columns = this.getColumnsBottomToTop();
+
+      for (let i = 0; i < columns.length; i++) {
+         const column = columns[i]!;
+         if (column.length === 0) continue;
          let max = this.height - 1;
-         column.forEach((cell) => {
+
+         for (let j = 0; j < column.length; j++) {
+            const cell = column[j]!;
             if (cell.position.row < max) {
                cell.position.row = max;
             }
+            if (cell.mergeWith) {
+               cell.mergeWith.position.row = max;
+               j++;
+            }
             max--;
-         });
-      });
+         }
+      }
    };
 
    public moveLeft = (): void => {
       this.findMerges(this.getRowsLeftToRight());
-      this.getRowsLeftToRight().forEach((row) => {
-         if (row.length === 0) return;
+
+      const rows = this.getRowsLeftToRight();
+
+      for (let i = 0; i < rows.length; i++) {
+         const row = rows[i]!;
+         if (row.length === 0) continue;
          let min = 0;
-         row.forEach((cell) => {
+
+         for (let j = 0; j < row.length; j++) {
+            const cell = row[j]!;
             if (cell.position.column > min) {
                cell.position.column = min;
             }
+            if (cell.mergeWith) {
+               cell.mergeWith.position.column = min;
+               j++;
+            }
             min++;
-         });
-      });
+         }
+      }
    };
 
    public moveRight = (): void => {
       this.findMerges(this.getRowsRightToLeft());
-      this.getRowsRightToLeft().forEach((row) => {
-         if (row.length === 0) return;
+
+      const rows = this.getRowsRightToLeft();
+
+      for (let i = 0; i < rows.length; i++) {
+         const row = rows[i]!;
+         if (row.length === 0) continue;
          let max = this.width - 1;
-         row.forEach((cell) => {
+
+         for (let j = 0; j < row.length; j++) {
+            const cell = row[j]!;
             if (cell.position.column < max) {
                cell.position.column = max;
             }
+            if (cell.mergeWith) {
+               cell.mergeWith.position.column = max;
+               j++;
+            }
             max--;
-         });
-      });
+         }
+      }
    };
 }

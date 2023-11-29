@@ -1,12 +1,21 @@
 import { Position } from "@/types/game";
 import { GameBoard } from "@/utils/GameBoard";
 import { cls } from "@/utils/styles";
-import { FC, useEffect, useMemo, useRef, useState } from "react";
-import { AnimationProps, motion } from "framer-motion";
+import { FC, RefObject, useEffect, useMemo, useRef, useState } from "react";
+import {
+   AnimationControls,
+   AnimationProps,
+   TargetAndTransition,
+   Variant,
+   Variants,
+   motion,
+   useAnimation,
+} from "framer-motion";
 
 export type CellProps = {
    board: GameBoard;
    cellAddress: Position;
+   boardSize: number;
 };
 
 type CellColors = {
@@ -50,11 +59,29 @@ const transitionProps: AnimationProps["transition"] = {
    ease: "easeOut",
 };
 
-export const Cell: FC<CellProps> = ({ board, cellAddress }) => {
+export const Cell: FC<CellProps> = ({ board, cellAddress, boardSize }) => {
    const cellData = useMemo(
       () => board.getCell(cellAddress),
-      [board.fields, cellAddress]
+      [board.cells, cellAddress]
    );
+
+   const animationControls = useAnimation();
+
+   const animateMerge = async () => {
+      await animationControls.start({
+         scale: 1.2,
+         transition: {
+            duration: 0.2,
+            ease: "easeOut",
+         },
+      });
+      await animationControls.start({
+         scale: 1,
+         transition: {
+            duration: 0.2,
+         },
+      });
+   };
 
    // const mainCellRef = useRef<HTMLDivElement>(null);
 
@@ -76,6 +103,19 @@ export const Cell: FC<CellProps> = ({ board, cellAddress }) => {
          }
       );
    }, [cellData?.value]);
+
+   const animateControls: Variants = {
+      position: {
+         height: boardSize / board.height,
+         width: boardSize / board.width,
+         top: (boardSize / board.height) * cellAddress.row,
+         left: (boardSize / board.width) * cellAddress.column,
+         scale: 1,
+      },
+      initial: {
+         scale: 0,
+      },
+   };
 
    // useEffect(() => {
    //    const resizeObserver = new ResizeObserver((entries) => {
@@ -109,54 +149,53 @@ export const Cell: FC<CellProps> = ({ board, cellAddress }) => {
    //    };
    // }, [mainCell, cellData?.value]);
 
-   return (
-      <div className="relative isolate h-full w-full rounded-xl">
-         {cellData ? (
-            <>
-               <motion.div
+   useEffect(() => {
+      console.log(boardSize);
+   }, [boardSize]);
+
+   return cellData ? (
+      <motion.div
+         className="absolute"
+         variants={animateControls}
+         animate={"position"}
+         initial={["position", "initial"]}
+         transition={{
+            duration: 0.2,
+            ease: "easeOut",
+            type: "spring",
+         }}
+         onAnimationComplete={() => {
+            if (cellData?.mergeWith?.animationEnded) {
+               board.mergeCell(cellData.id);
+               animateMerge();
+            } else {
+               cellData.animationEnded = true;
+            }
+         }}
+      >
+         <div className="relative isolate h-full w-full rounded-xl">
+            <motion.div
+               className={cls(
+                  "absolute inset-0 z-20 flex h-full w-full items-center justify-center rounded-xl",
+                  colors?.bg
+               )}
+               transition={transitionProps}
+               layout
+               animate={animationControls}
+               // ref={mainCellRef}
+               // ref={(ref) => setMainCell(ref)}
+            >
+               <span
                   className={cls(
-                     "absolute inset-0 z-20 flex h-full w-full items-center justify-center rounded-xl",
-                     colors?.bg
+                     "select-none text-2xl font-bold",
+                     colors?.text
                   )}
-                  // layoutId={cellData.id}
-                  transition={transitionProps}
-                  layout
-                  // ref={mainCellRef}
-                  // ref={(ref) => setMainCell(ref)}
+                  // ref={mainTextRef}
                >
-                  <span
-                     className={cls(
-                        "select-none text-2xl font-bold",
-                        colors?.text
-                     )}
-                     // ref={mainTextRef}
-                  >
-                     {cellData.value}
-                  </span>
-               </motion.div>
-               {cellData.mergeWith ? (
-                  <motion.div
-                     className={cls(
-                        "absolute inset-0 z-10 flex h-full w-full items-center justify-center rounded-xl",
-                        colors.bg
-                     )}
-                     // layoutId={cellData.mergeWith.id}
-                     layout
-                     transition={transitionProps}
-                  >
-                     <span
-                        className={cls(
-                           "select-none text-2xl font-bold",
-                           colors.text
-                        )}
-                        // ref={mergeTextRef}
-                     >
-                        {cellData.mergeWith.value}
-                     </span>
-                  </motion.div>
-               ) : null}
-            </>
-         ) : null}
-      </div>
-   );
+                  {cellData.value}
+               </span>
+            </motion.div>
+         </div>
+      </motion.div>
+   ) : null;
 };
