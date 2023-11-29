@@ -59,10 +59,17 @@ const transitionProps: AnimationProps["transition"] = {
    ease: "easeOut",
 };
 
+const gap = 8;
+
 export const Cell: FC<CellProps> = ({ board, cellAddress, boardSize }) => {
    const cellData = useMemo(
       () => board.getCell(cellAddress),
       [board.cells, cellAddress]
+   );
+
+   const cellSize = useMemo(
+      () => (boardSize - gap * (board.width - 1)) / board.width,
+      [boardSize]
    );
 
    const animationControls = useAnimation();
@@ -106,10 +113,9 @@ export const Cell: FC<CellProps> = ({ board, cellAddress, boardSize }) => {
 
    const animateControls: Variants = {
       position: {
-         height: boardSize / board.height,
-         width: boardSize / board.width,
-         top: (boardSize / board.height) * cellAddress.row,
-         left: (boardSize / board.width) * cellAddress.column,
+         top: cellAddress.row * (cellSize + gap),
+         left: cellAddress.column * (cellSize + gap),
+
          scale: 1,
       },
       initial: {
@@ -172,11 +178,15 @@ export const Cell: FC<CellProps> = ({ board, cellAddress, boardSize }) => {
                cellData.animationEnded = true;
             }
          }}
+         style={{
+            height: cellSize,
+            width: cellSize,
+         }}
       >
          <div className="relative isolate h-full w-full rounded-xl">
             <motion.div
                className={cls(
-                  "absolute inset-0 z-20 flex h-full w-full items-center justify-center rounded-xl",
+                  "absolute inset-0 z-20 flex h-full w-full items-center justify-center rounded-xl shadow-sm shadow-slate-400/25",
                   colors?.bg
                )}
                transition={transitionProps}
