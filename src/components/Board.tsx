@@ -1,7 +1,7 @@
 import { Cell } from "@/components/Cell";
 import { GameBoard } from "@/utils/GameBoard";
 import { FC, useCallback, useEffect, useRef, useState } from "react";
-
+import { useDebounce } from "usehooks-ts";
 export type BoardProps = {
    dimensions: number;
 };
@@ -15,6 +15,12 @@ export const Board: FC<BoardProps> = ({ dimensions }) => {
    const cellsRef = useRef<HTMLDivElement>(null);
 
    const [boardSize, setBoardSize] = useState(0);
+   const debouncedBoardSize = useDebounce(boardSize, 100);
+
+   const updateBoard = useCallback(
+      () => setBoard(board.getClone()),
+      [setBoard]
+   );
    const handleKeyPress = useCallback((e: KeyboardEvent) => {
       if (isBlocked) return;
 
@@ -23,27 +29,30 @@ export const Board: FC<BoardProps> = ({ dimensions }) => {
          case "ArrowUp":
          case "w":
             board.moveUp();
-            setBoard(board.getClone());
+            updateBoard();
+            board.addRandomCell();
             break;
          case "ArrowDown":
          case "s":
             board.moveDown();
-            setBoard(board.getClone());
+            updateBoard();
+            board.addRandomCell();
             break;
          case "ArrowLeft":
          case "a":
             board.moveLeft();
-            setBoard(board.getClone());
+            updateBoard();
+            board.addRandomCell();
             break;
          case "ArrowRight":
          case "d":
             board.moveRight();
-            setBoard(board.getClone());
+            updateBoard();
+            board.addRandomCell();
             break;
       }
       setTimeout(() => {
-         board.addRandomCell();
-         setBoard(board.getClone());
+         updateBoard();
          setIsBlocked(false);
       }, 300);
    }, []);
@@ -99,32 +108,14 @@ export const Board: FC<BoardProps> = ({ dimensions }) => {
             ))}
          </div>
          <div className="absolute flex flex-col gap-2" ref={cellsRef}>
-            {/* {Array.from({ length: height }, (_, i) => (
-               <div key={i} className="flex flex-grow gap-2">
-                  {Array.from({ length: width }, (_, j) => (
-                     <div
-                        key={`cell-${j}`}
-                        className="aspect-square flex-grow rounded-xl"
-                     >
-                        <Cell
-                           // key={j}
-                           board={board}
-                           cellAddress={{
-                              row: i,
-                              column: j,
-                           }}
-                        />
-                     </div>
-                  ))}
-               </div>
-            ))} */}
             {board.cells.map((cell) => {
                return (
                   <Cell
                      key={cell.id}
                      board={board}
                      cellAddress={cell.position}
-                     boardSize={boardSize}
+                     boardSize={debouncedBoardSize}
+                     updateBoard={updateBoard}
                   />
                );
             })}

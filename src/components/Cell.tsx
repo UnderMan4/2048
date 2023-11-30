@@ -1,21 +1,14 @@
 import { Position } from "@/types/game";
 import { GameBoard } from "@/utils/GameBoard";
 import { cls } from "@/utils/styles";
-import { FC, RefObject, useEffect, useMemo, useRef, useState } from "react";
-import {
-   AnimationControls,
-   AnimationProps,
-   TargetAndTransition,
-   Variant,
-   Variants,
-   motion,
-   useAnimation,
-} from "framer-motion";
+import { AnimationProps, Variants, motion, useAnimation } from "framer-motion";
+import { FC, useMemo, useRef } from "react";
 
 export type CellProps = {
    board: GameBoard;
    cellAddress: Position;
    boardSize: number;
+   updateBoard: () => void;
 };
 
 type CellColors = {
@@ -61,7 +54,12 @@ const transitionProps: AnimationProps["transition"] = {
 
 const gap = 8;
 
-export const Cell: FC<CellProps> = ({ board, cellAddress, boardSize }) => {
+export const Cell: FC<CellProps> = ({
+   board,
+   cellAddress,
+   boardSize,
+   updateBoard,
+}) => {
    const cellData = useMemo(
       () => board.getCell(cellAddress),
       [board.cells, cellAddress]
@@ -75,27 +73,28 @@ export const Cell: FC<CellProps> = ({ board, cellAddress, boardSize }) => {
    const animationControls = useAnimation();
 
    const animateMerge = async () => {
-      await animationControls.start({
-         scale: 1.2,
-         transition: {
-            duration: 0.2,
-            ease: "easeOut",
-         },
-      });
-      await animationControls.start({
-         scale: 1,
-         transition: {
-            duration: 0.2,
-         },
-      });
+      if (innerCellRef.current) {
+         await animationControls.start({
+            scale: 1.2,
+            transition: {
+               duration: 0.1,
+               ease: "easeOut",
+            },
+         });
+      }
+      if (innerCellRef.current) {
+         await animationControls.start({
+            scale: 1,
+            transition: {
+               duration: 0.1,
+            },
+         });
+      }
    };
 
-   // const mainCellRef = useRef<HTMLDivElement>(null);
-
-   // const [mainCell, setMainCell] = useState<HTMLDivElement | null>(null);
-
-   // const mainTextRef = useRef<HTMLSpanElement>(null);
-   // const mergeTextRef = useRef<HTMLSpanElement>(null);
+   const innerCellRef = useRef<HTMLDivElement>(null);
+   const outerCellRef = useRef<HTMLDivElement>(null);
+   const valueRef = useRef<HTMLSpanElement>(null);
 
    const colors = useMemo(() => {
       if (!cellData)
@@ -123,41 +122,21 @@ export const Cell: FC<CellProps> = ({ board, cellAddress, boardSize }) => {
       },
    };
 
-   // useEffect(() => {
-   //    const resizeObserver = new ResizeObserver((entries) => {
-   //       console.log(entries);
-   //       const [entry] = entries;
+   const fontScale = useMemo(() => {
+      if (valueRef.current) {
+         const { width } = valueRef.current.getBoundingClientRect();
 
-   //       if (!entry) return;
+         if (width > cellSize * 0.9) {
+            return (cellSize / width) * 0.9;
+         }
 
-   //       const { width: mainWidth } = entry.contentRect;
+         if (width < cellSize * 0.6) {
+            return (cellSize / width) * 0.6;
+         }
 
-   //       if (mainTextRef.current) {
-   //          const mergeTextSize = mainTextRef.current.getBoundingClientRect();
-   //          console.log(mergeTextSize);
-   //          console.log(mergeTextSize.width, mainWidth);
-   //          if (mergeTextSize.width > mainWidth) {
-   //             const proportion = mainWidth / mergeTextSize.width;
-   //             mainTextRef.current.style.scale = proportion.toString();
-   //          }
-   //       }
-   //    });
-
-   //    if (mainCell) {
-   //       resizeObserver.observe(mainCell);
-   //    }
-
-   //    return () => {
-   //       console.log("unmounting");
-   //       if (mainCellRef.current) {
-   //          resizeObserver.unobserve(mainCellRef.current);
-   //       }
-   //    };
-   // }, [mainCell, cellData?.value]);
-
-   useEffect(() => {
-      console.log(boardSize);
-   }, [boardSize]);
+         return 1;
+      }
+   }, [cellSize, board]);
 
    return cellData ? (
       <motion.div
@@ -170,10 +149,11 @@ export const Cell: FC<CellProps> = ({ board, cellAddress, boardSize }) => {
             ease: "easeOut",
             type: "spring",
          }}
-         onAnimationComplete={() => {
+         onAnimationComplete={async () => {
             if (cellData?.mergeWith?.animationEnded) {
+               await animateMerge();
                board.mergeCell(cellData.id);
-               animateMerge();
+               updateBoard();
             } else {
                cellData.animationEnded = true;
             }
@@ -182,25 +162,34 @@ export const Cell: FC<CellProps> = ({ board, cellAddress, boardSize }) => {
             height: cellSize,
             width: cellSize,
          }}
+         ref={outerCellRef}
       >
          <div className="relative isolate h-full w-full rounded-xl">
             <motion.div
                className={cls(
-                  "absolute inset-0 z-20 flex h-full w-full items-center justify-center rounded-xl shadow-sm shadow-slate-400/25",
+                  "absolute inset-0 z-20 flex h-full w-full items-center justify-center rounded-xl",
+                  "shadow-sm shadow-slate-400/25 transition-colors duration-[50ms]",
                   colors?.bg
                )}
                transition={transitionProps}
                layout
                animate={animationControls}
-               // ref={mainCellRef}
-               // ref={(ref) => setMainCell(ref)}
+               ref={innerCellRef}
             >
                <span
                   className={cls(
-                     "select-none text-2xl font-bold",
+                     "select-none text-2xl font-bold transition-colors duration-[50ms]",
                      colors?.text
                   )}
-                  // ref={mainTextRef}
+                  style={{
+                     fontSize: `${1.5 * (fontScale ?? 1)}rem`,
+                  }}
+               >
+                  {cellData.value}
+               </span>
+               <span
+                  ref={valueRef}
+                  className="invisible absolute text-2xl font-bold"
                >
                   {cellData.value}
                </span>

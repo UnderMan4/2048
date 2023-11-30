@@ -177,17 +177,14 @@ export class GameBoard {
       this.findMerges(this.getColumnsTopToBottom());
 
       const columns = this.getColumnsTopToBottom();
-      console.log(
-         "🚀 ~ file: GameBoard.ts:171 ~ GameBoard ~ columns:",
-         columns
-      );
 
-      for (let i = 0; i < columns.length; i++) {
-         const column = columns[i]!;
+      for (const element of columns) {
+         const column = element;
          if (column.length === 0) continue;
          let min = 0;
 
-         for (let j = 0; j < column.length; j++) {
+         let j = 0;
+         while (j < column.length) {
             const cell = column[j]!;
             if (cell.position.row > min) {
                cell.position.row = min;
@@ -196,6 +193,7 @@ export class GameBoard {
                cell.mergeWith.position.row = min;
                j++;
             }
+            j++;
             min++;
          }
       }
@@ -206,12 +204,13 @@ export class GameBoard {
 
       const columns = this.getColumnsBottomToTop();
 
-      for (let i = 0; i < columns.length; i++) {
-         const column = columns[i]!;
+      for (const element of columns) {
+         const column = element;
          if (column.length === 0) continue;
          let max = this.height - 1;
 
-         for (let j = 0; j < column.length; j++) {
+         let j = 0;
+         while (j < column.length) {
             const cell = column[j]!;
             if (cell.position.row < max) {
                cell.position.row = max;
@@ -220,6 +219,7 @@ export class GameBoard {
                cell.mergeWith.position.row = max;
                j++;
             }
+            j++;
             max--;
          }
       }
@@ -230,12 +230,13 @@ export class GameBoard {
 
       const rows = this.getRowsLeftToRight();
 
-      for (let i = 0; i < rows.length; i++) {
-         const row = rows[i]!;
+      for (const element of rows) {
+         const row = element;
          if (row.length === 0) continue;
          let min = 0;
 
-         for (let j = 0; j < row.length; j++) {
+         let j = 0;
+         while (j < row.length) {
             const cell = row[j]!;
             if (cell.position.column > min) {
                cell.position.column = min;
@@ -244,6 +245,7 @@ export class GameBoard {
                cell.mergeWith.position.column = min;
                j++;
             }
+            j++;
             min++;
          }
       }
@@ -254,12 +256,13 @@ export class GameBoard {
 
       const rows = this.getRowsRightToLeft();
 
-      for (let i = 0; i < rows.length; i++) {
-         const row = rows[i]!;
+      for (const element of rows) {
+         const row = element;
          if (row.length === 0) continue;
          let max = this.width - 1;
 
-         for (let j = 0; j < row.length; j++) {
+         let j = 0;
+         while (j < row.length) {
             const cell = row[j]!;
             if (cell.position.column < max) {
                cell.position.column = max;
@@ -268,6 +271,7 @@ export class GameBoard {
                cell.mergeWith.position.column = max;
                j++;
             }
+            j++;
             max--;
          }
       }
