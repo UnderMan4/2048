@@ -21,6 +21,13 @@ export const Board: FC<BoardProps> = ({ dimensions }) => {
       () => setBoard(board.getClone()),
       [setBoard]
    );
+
+   const addCell = useCallback(() => {
+      setTimeout(() => {
+         board.addRandomCell();
+         updateBoard();
+      }, 150);
+   }, [board]);
    const handleKeyPress = useCallback((e: KeyboardEvent) => {
       if (isBlocked) return;
 
@@ -30,25 +37,25 @@ export const Board: FC<BoardProps> = ({ dimensions }) => {
          case "w":
             board.moveUp();
             updateBoard();
-            board.addRandomCell();
+            addCell();
             break;
          case "ArrowDown":
          case "s":
             board.moveDown();
             updateBoard();
-            board.addRandomCell();
+            addCell();
             break;
          case "ArrowLeft":
          case "a":
             board.moveLeft();
             updateBoard();
-            board.addRandomCell();
+            addCell();
             break;
          case "ArrowRight":
          case "d":
             board.moveRight();
             updateBoard();
-            board.addRandomCell();
+            addCell();
             break;
       }
       setTimeout(() => {

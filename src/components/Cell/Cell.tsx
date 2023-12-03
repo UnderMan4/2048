@@ -1,3 +1,4 @@
+import { useFontScale } from "@/components/Cell/Cell.hooks";
 import { Position } from "@/types/game";
 import { GameBoard } from "@/utils/GameBoard";
 import { cls } from "@/utils/styles";
@@ -52,7 +53,7 @@ const transitionProps: AnimationProps["transition"] = {
    ease: "easeOut",
 };
 
-const gap = 8;
+const GAP = 8 as const;
 
 export const Cell: FC<CellProps> = ({
    board,
@@ -66,7 +67,7 @@ export const Cell: FC<CellProps> = ({
    );
 
    const cellSize = useMemo(
-      () => (boardSize - gap * (board.width - 1)) / board.width,
+      () => (boardSize - GAP * (board.width - 1)) / board.width,
       [boardSize]
    );
 
@@ -112,8 +113,8 @@ export const Cell: FC<CellProps> = ({
 
    const animateControls: Variants = {
       position: {
-         top: cellAddress.row * (cellSize + gap),
-         left: cellAddress.column * (cellSize + gap),
+         top: cellAddress.row * (cellSize + GAP),
+         left: cellAddress.column * (cellSize + GAP),
 
          scale: 1,
       },
@@ -122,21 +123,7 @@ export const Cell: FC<CellProps> = ({
       },
    };
 
-   const fontScale = useMemo(() => {
-      if (valueRef.current) {
-         const { width } = valueRef.current.getBoundingClientRect();
-
-         if (width > cellSize * 0.9) {
-            return (cellSize / width) * 0.9;
-         }
-
-         if (width < cellSize * 0.6) {
-            return (cellSize / width) * 0.6;
-         }
-
-         return 1;
-      }
-   }, [cellSize, board]);
+   const fontScale = useFontScale(valueRef, cellSize, board);
 
    return cellData ? (
       <motion.div
@@ -178,11 +165,12 @@ export const Cell: FC<CellProps> = ({
             >
                <span
                   className={cls(
-                     "select-none text-2xl font-bold transition-colors duration-[50ms]",
+                     "select-none font-bold transition-colors duration-[50ms]",
                      colors?.text
                   )}
                   style={{
                      fontSize: `${1.5 * (fontScale ?? 1)}rem`,
+                     lineHeight: `${1.5 * (fontScale ?? 1)}rem`,
                   }}
                >
                   {cellData.value}

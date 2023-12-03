@@ -102,8 +102,8 @@ export class GameBoard {
 
          this.cells.push({
             id: nanoid(10),
-            value: getRandomValueFromArray([2, 2, 2, 4]),
-            // value: getRandomValueFromArray([16]),
+            value: getRandomValueFromArray([2, 2, 2, 2, 2, 2, 2, 2, 2, 4]),
+            // value: getRandomValueFromArray([2048]),
             position,
          });
       } while (!foundEmptyCell);
