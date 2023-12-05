@@ -7,3 +7,32 @@
 body {
    font-family: "Lato", sans-serif;
 }
+
+.theme-standard {
+   --main-bg-color: #030308;
+   --empty-cell-bg-color: #0b0b10;
+   --2-cell-bg-color: #c9c6ec;
+   --4-cell-bg-color: #a69fdf;
+   --8-cell-bg-color: #8279d2;
+   --16-cell-bg-color: #5e53c6;
+   --32-cell-bg-color: #4539ac;
+   --64-cell-bg-color: #362d86;
+   --128-cell-bg-color: #b853c6;
+   --256-cell-bg-color: #9f39ac;
+   --512-cell-bg-color: #7b2d86;
+   --1024-cell-bg-color: #582060;
+   --2048-cell-bg-color: #351339;
+   --default-cell-bg-color: #120613;
+   --2-cell-fg-color: #080613;
+   --4-cell-fg-color: #080613;
+   --8-cell-fg-color: #080613;
+   --16-cell-fg-color: #c9c6ec;
+   --32-cell-fg-color: #c9c6ec;
+   --64-cell-fg-color: #c9c6ec;
+   --128-cell-fg-color: #e7c6ec;
+   --256-cell-fg-color: #e7c6ec;
+   --512-cell-fg-color: #e7c6ec;
+   --1024-cell-fg-color: #e7c6ec;
+   --2048-cell-fg-color: #e7c6ec;
+   --default-cell-fg-color: #e7c6ec;
+}

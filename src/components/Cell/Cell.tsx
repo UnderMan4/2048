@@ -12,42 +12,6 @@ export type CellProps = {
    updateBoard: () => void;
 };
 
-type CellColors = {
-   bg: string;
-   text: string;
-};
-
-const cellColors: Record<number, CellColors> = {
-   2: {
-      bg: "bg-slate-200",
-      text: "text-slate-800",
-   },
-   4: {
-      bg: "bg-slate-300",
-      text: "text-slate-600",
-   },
-   8: {
-      bg: "bg-slate-400",
-      text: "text-slate-300",
-   },
-   16: {
-      bg: "bg-slate-500",
-      text: "text-slate-300",
-   },
-   32: {
-      bg: "bg-slate-600",
-      text: "text-slate-300",
-   },
-   64: {
-      bg: "bg-slate-700",
-      text: "text-slate-300",
-   },
-   128: {
-      bg: "bg-slate-800",
-      text: "text-slate-300",
-   },
-};
-
 const transitionProps: AnimationProps["transition"] = {
    duration: 0.1,
    ease: "easeOut",
@@ -97,20 +61,6 @@ export const Cell: FC<CellProps> = ({
    const outerCellRef = useRef<HTMLDivElement>(null);
    const valueRef = useRef<HTMLSpanElement>(null);
 
-   const colors = useMemo(() => {
-      if (!cellData)
-         return {
-            bg: "bg-black",
-            text: "text-slate-200",
-         };
-      return (
-         cellColors[cellData.value] ?? {
-            bg: "bg-black",
-            text: "text-slate-200",
-         }
-      );
-   }, [cellData?.value]);
-
    const animateControls: Variants = {
       position: {
          top: cellAddress.row * (cellSize + GAP),
@@ -132,7 +82,7 @@ export const Cell: FC<CellProps> = ({
          animate={"position"}
          initial={["position", "initial"]}
          transition={{
-            duration: 0.2,
+            duration: 0.15,
             ease: "easeOut",
             type: "spring",
          }}
@@ -155,8 +105,21 @@ export const Cell: FC<CellProps> = ({
             <motion.div
                className={cls(
                   "absolute inset-0 z-20 flex h-full w-full items-center justify-center rounded-xl",
-                  "shadow-sm shadow-slate-400/25 transition-colors duration-[50ms]",
-                  colors?.bg
+                  "shadow-sm shadow-slate-400/25 transition-colors duration-[100ms]",
+                  {
+                     "bg-cell-bg-2": cellData.value === 2,
+                     "bg-cell-bg-4": cellData.value === 4,
+                     "bg-cell-bg-8": cellData.value === 8,
+                     "bg-cell-bg-16": cellData.value === 16,
+                     "bg-cell-bg-32": cellData.value === 32,
+                     "bg-cell-bg-64": cellData.value === 64,
+                     "bg-cell-bg-128": cellData.value === 128,
+                     "bg-cell-bg-256": cellData.value === 256,
+                     "bg-cell-bg-512": cellData.value === 512,
+                     "bg-cell-bg-1024": cellData.value === 1024,
+                     "bg-cell-bg-2048": cellData.value === 2048,
+                     "bg-cell-bg-default": cellData.value > 2048,
+                  }
                )}
                transition={transitionProps}
                layout
@@ -166,7 +129,20 @@ export const Cell: FC<CellProps> = ({
                <span
                   className={cls(
                      "select-none font-bold transition-colors duration-[50ms]",
-                     colors?.text
+                     {
+                        "text-cell-fg-2": cellData.value === 2,
+                        "text-cell-fg-4": cellData.value === 4,
+                        "text-cell-fg-8": cellData.value === 8,
+                        "text-cell-fg-16": cellData.value === 16,
+                        "text-cell-fg-32": cellData.value === 32,
+                        "text-cell-fg-64": cellData.value === 64,
+                        "text-cell-fg-128": cellData.value === 128,
+                        "text-cell-fg-256": cellData.value === 256,
+                        "text-cell-fg-512": cellData.value === 512,
+                        "text-cell-fg-1024": cellData.value === 1024,
+                        "text-cell-fg-2048": cellData.value === 2048,
+                        "text-cell-fg-default": cellData.value > 2048,
+                     }
                   )}
                   style={{
                      fontSize: `${1.5 * (fontScale ?? 1)}rem`,

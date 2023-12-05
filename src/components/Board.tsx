@@ -8,11 +8,13 @@ export type BoardProps = {
 
 export const Board: FC<BoardProps> = ({ dimensions }) => {
    const [board, setBoard] = useState(new GameBoard(dimensions));
-   const [isBlocked, setIsBlocked] = useState(false);
    const { height, width } = board;
    const parentRef = useRef<HTMLDivElement>(null);
    const bgCellsRef = useRef<HTMLDivElement>(null);
    const cellsRef = useRef<HTMLDivElement>(null);
+
+   const blockedRef = useRef(false);
+   const pressedRef = useRef(false);
 
    const [boardSize, setBoardSize] = useState(0);
    const debouncedBoardSize = useDebounce(boardSize, 100);
@@ -28,10 +30,12 @@ export const Board: FC<BoardProps> = ({ dimensions }) => {
          updateBoard();
       }, 150);
    }, [board]);
-   const handleKeyPress = useCallback((e: KeyboardEvent) => {
-      if (isBlocked) return;
 
-      setIsBlocked(true);
+   const handleKeyPress = useCallback((e: KeyboardEvent) => {
+      if (blockedRef.current || pressedRef.current) return;
+
+      blockedRef.current = true;
+      pressedRef.current = true;
       switch (e.key) {
          case "ArrowUp":
          case "w":
@@ -60,14 +64,20 @@ export const Board: FC<BoardProps> = ({ dimensions }) => {
       }
       setTimeout(() => {
          updateBoard();
-         setIsBlocked(false);
-      }, 300);
+         blockedRef.current = false;
+      }, 150);
+   }, []);
+
+   const handleKeyUp = useCallback(() => {
+      pressedRef.current = false;
    }, []);
 
    useEffect(() => {
       window.addEventListener("keydown", handleKeyPress);
+      window.addEventListener("keyup", handleKeyUp);
       return () => {
          window.removeEventListener("keydown", handleKeyPress);
+         window.removeEventListener("keyup", handleKeyUp);
       };
    }, []);
 
@@ -108,7 +118,7 @@ export const Board: FC<BoardProps> = ({ dimensions }) => {
                   {Array.from({ length: width }, (_, j) => (
                      <div
                         key={`bg-${j}`}
-                        className="aspect-square flex-grow rounded-xl bg-slate-600"
+                        className="bg-cell-bg-empty aspect-square flex-grow rounded-xl"
                      />
                   ))}
                </div>
