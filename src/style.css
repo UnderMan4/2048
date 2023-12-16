@@ -9,7 +9,11 @@ body {
 }
 
 .theme-standard {
-   --main-bg-color: #030308;
+   --text: #dedcf4;
+   --background: #030307;
+   --primary: #9f98dd;
+   --secondary: #742a7e;
+   --accent: #c85bbd;
    --empty-cell-bg-color: #0b0b10;
    --2-cell-bg-color: #c9c6ec;
    --4-cell-bg-color: #a69fdf;

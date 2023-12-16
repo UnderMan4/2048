@@ -1,5 +1,6 @@
-import { Board } from "@/components/Board";
 import { cls } from "@/utils/styles";
+import { RouterProvider } from "react-router-dom";
+import { router } from "@/router";
 
 function App() {
    return (
@@ -8,10 +9,10 @@ function App() {
             {
                "theme-standard": true,
             },
-            "bg-background flex h-screen w-screen items-center justify-center"
+            "bg-background text-foreground h-screen"
          )}
       >
-         <Board dimensions={8} />
+         <RouterProvider router={router} />
       </div>
    );
 }

@@ -32,4 +32,9 @@ export const useFontScale = (
          return scale;
       }
       return 1;
-   }, [cellSize, board]);
+   }, [
+      cellSize,
+      board,
+      referenceRef.current?.offsetWidth,
+      referenceRef.current?.offsetHeight,
+   ]);

@@ -5,7 +5,11 @@ export default {
    theme: {
       extend: {
          colors: {
-            background: "var(--main-bg-color)",
+            background: "var(--background)",
+            foreground: "var(--text)",
+            primary: "var(--primary)",
+            secondary: "var(--secondary)",
+            accent: "var(--accent)",
             "cell-bg": {
                empty: "var(--empty-cell-bg-color)",
                2: "var(--2-cell-bg-color)",

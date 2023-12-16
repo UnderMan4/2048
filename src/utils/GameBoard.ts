@@ -89,6 +89,7 @@ export class GameBoard {
    };
 
    public addRandomCell = (): void => {
+      if (this.isBoardFull()) return;
       let foundEmptyCell = false;
       do {
          const position = {
@@ -127,11 +128,15 @@ export class GameBoard {
       this.cells.splice(this.cells.indexOf(cell), 1);
    };
 
-   public isGameOver = (): boolean => {
-      if (this.cells.length < this.height * this.width) return false;
+   public isBoardFull = (): boolean => {
+      return this.cells.length === this.height * this.width;
+   };
 
-      for (let row = 0; row < this.height; row++) {
-         for (let column = 0; column < this.width; column++) {
+   public isGameOver = (): boolean => {
+      if (!this.isBoardFull()) return false;
+
+      for (let row = 0; row < this.height; row += 2) {
+         for (let column = row % 2; column < this.width; column += 2) {
             const cell = this.getCell({ row, column })!;
             const topCell = this.getCell({ row: row - 1, column });
             const bottomCell = this.getCell({ row: row + 1, column });
@@ -139,14 +144,10 @@ export class GameBoard {
             const rightCell = this.getCell({ row, column: column + 1 });
 
             if (
-               !topCell ||
-               !bottomCell ||
-               !leftCell ||
-               !rightCell ||
-               cell.value === topCell.value ||
-               cell.value === bottomCell.value ||
-               cell.value === leftCell.value ||
-               cell.value === rightCell.value
+               (topCell && cell.value === topCell.value) ||
+               (bottomCell && cell.value === bottomCell.value) ||
+               (leftCell && cell.value === leftCell.value) ||
+               (rightCell && cell.value === rightCell.value)
             )
                return false;
          }
