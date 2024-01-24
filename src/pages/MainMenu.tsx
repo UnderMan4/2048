@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { twMerge } from "tailwind-merge";
-import { Button } from "../components/Button";
+import { MainMenuCard } from "../features/main-menu/MainMenuCard/MainMenuCard";
 
 export type MainMenuProps = {
    className?: string;
@@ -8,11 +8,9 @@ export type MainMenuProps = {
 
 export const MainMenu: FC<MainMenuProps> = ({ className }) => {
    return (
-      <div className={twMerge("flex flex-col gap-2", className)}>
-         <Button>Select Game</Button>
-         <Button>Settings</Button>
-         <Button>Export save</Button>
-         <Button>Import save</Button>
+      <div className={twMerge("flex flex-row gap-8", className)}>
+         <MainMenuCard icon="arcticons:games-2" label="Select game" />
+         <MainMenuCard icon="arcticons:hidden-settings" label="Settings" />
       </div>
    );
 };

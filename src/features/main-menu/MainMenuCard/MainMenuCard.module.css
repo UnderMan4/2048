@@ -1,0 +1,16 @@
+.cardGradient {
+   background: linear-gradient(
+      135deg,
+      rgb(156 163 175 / 0.25),
+      rgb(75 85 99 / 0.25),
+      var(--primary),
+      var(--accent)
+   );
+   background-size: 200% 200%;
+   background-position: 0% 0%;
+   transition: all 0.5s ease-in-out;
+}
+
+.menuCard:hover .cardGradient {
+   background-position: 100% 100%;
+}
