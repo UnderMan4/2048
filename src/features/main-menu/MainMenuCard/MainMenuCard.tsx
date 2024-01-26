@@ -5,10 +5,9 @@ import {
    useSpring,
    useTransform,
 } from "framer-motion";
-import { FC, useRef } from "react";
+import { FC } from "react";
 import { twMerge } from "tailwind-merge";
 import styles from "./MainMenuCard.module.css";
-import { useHover } from "usehooks-ts";
 
 export type MainMenuCardProps = {
    className?: string;
@@ -19,6 +18,7 @@ export type MainMenuCardProps = {
 const CONTENT_CLASS_NAME =
    "absolute inset-0 flex flex-col items-center justify-between rounded-3xl p-7 pb-10";
 const ICON_SIZE = 155;
+const NUM_LAYERS = 6;
 export const MainMenuCard: FC<MainMenuCardProps> = ({
    className,
    icon,
@@ -75,21 +75,36 @@ export const MainMenuCard: FC<MainMenuCardProps> = ({
                CONTENT_CLASS_NAME
             )}
          >
-            <Icon
-               style={{
-                  transform: "translateZ(24px)",
-               }}
-               icon={icon}
-               height={ICON_SIZE}
-            />
-            <p
-               style={{
-                  transform: "translateZ(32px)",
-               }}
-               className="text-2xl font-bold tracking-wide"
-            >
-               {label}
-            </p>
+            {Array.from({ length: NUM_LAYERS }).map((_, i) => {
+               const colorValue = `${255 - (NUM_LAYERS - i) * 20}`;
+               const color = `rgb(${Array(3).fill(colorValue).join(" ")})`;
+               return (
+                  <div
+                     style={{ transformStyle: "preserve-3d" }}
+                     className="absolute inset-0 flex flex-col items-center justify-between p-7 pb-10"
+                     key={i}
+                  >
+                     <Icon
+                        style={{
+                           transform: `translateZ(${i * 3}px)`,
+                           color,
+                        }}
+                        className=""
+                        icon={icon}
+                        height={ICON_SIZE}
+                     />
+                     <p
+                        style={{
+                           transform: `translateZ(${i * 1.2 + 20}px)`,
+                           color,
+                        }}
+                        className="text-2xl font-bold tracking-wide"
+                     >
+                        {label}
+                     </p>
+                  </div>
+               );
+            })}
          </div>
          <div
             className={twMerge(
@@ -97,22 +112,8 @@ export const MainMenuCard: FC<MainMenuCardProps> = ({
                "text-secondary  opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-80"
             )}
          >
-            <Icon
-               style={{
-                  transform: "translateZ(24px)",
-               }}
-               icon={icon}
-               height={ICON_SIZE}
-               className="blur-[3px]"
-            />
-            <p
-               style={{
-                  transform: "translateZ(32px)",
-               }}
-               className="text-2xl font-bold blur-[4px]"
-            >
-               {label}
-            </p>
+            <Icon icon={icon} height={ICON_SIZE} className="blur-[3px]" />
+            <p className="text-2xl font-bold blur-[4px]">{label}</p>
          </div>
       </motion.button>
    );
